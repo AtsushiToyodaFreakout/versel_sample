@@ -20,7 +20,7 @@ export default function Home() {
       setMessage("ChatGPT APIを呼び出し中...");
       setRecommendations([]);
       
-      const res = await fetch(`/api/python?artist=${encodeURIComponent(artistInput)}`);
+      const res = await fetch(`/api/index?artist=${encodeURIComponent(artistInput)}`);
       const data = await res.json();
       
       if (data.status === 'success') {
