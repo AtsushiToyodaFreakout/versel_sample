@@ -5,6 +5,6 @@
     }
   },
   "rewrites": [
-    { "source": "/api/python/(.*)", "destination": "/api/index.py" }
+    { "source": "/api/python/(.*)", "destination": "/api/index.py?$1" }
   ]
 }
