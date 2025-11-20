@@ -2,10 +2,16 @@
 
 import { useState } from 'react';
 
+interface Recommendation {
+  artist: string;
+  reason: string;
+  song: string;
+}
+
 export default function Home() {
   const [message, setMessage] = useState("アーティスト名を入力して検索ボタンを押してください");
   const [artistInput, setArtistInput] = useState("");
-  const [recommendations, setRecommendations] = useState([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const searchArtist = async () => {
@@ -86,7 +92,7 @@ export default function Home() {
         {recommendations.length > 0 && (
           <div style={{ marginTop: '30px', textAlign: 'left', maxWidth: '600px', margin: '30px auto' }}>
             <h2>おすすめアーティスト:</h2>
-            {recommendations.map((rec: any, index: number) => (
+            {recommendations.map((rec: Recommendation, index: number) => (
               <div key={index} style={{ 
                 border: '1px solid #ddd', 
                 padding: '15px', 
