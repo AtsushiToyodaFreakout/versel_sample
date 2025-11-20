@@ -7,19 +7,20 @@ import os
 app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
+@app.route('/index', methods=['GET'])
 def index():
     try:
         # URLパラメータからアーティスト名を取得
         artist = request.args.get('artist', 'スピッツ')
-        
+
         # 環境変数からAPIキーを取得
         api_key = os.getenv('OPENAI_API_KEY')
         if not api_key:
             return jsonify({
                 "status": "error",
                 "message": "OPENAI_API_KEY環境変数が設定されていません"
-            })
-        
+            }), 500
+
         client = openai.OpenAI(api_key=api_key)
 
         # ChatGPT APIに投げるプロンプト
@@ -60,7 +61,7 @@ def index():
             try:
                 # JSON文字列をPythonの辞書に変換
                 data = json.loads(json_text)
-                
+
                 return jsonify({
                     "status": "success",
                     "artist": artist,
@@ -71,19 +72,30 @@ def index():
                     "status": "error",
                     "message": "AIの回答をJSONとして解析できませんでした",
                     "raw_response": raw_response
-                })
+                }), 500
         else:
             return jsonify({
-                "status": "error", 
-                "message": "AIの回答からJSON部分を見つけられませんでした",
+                "status": "error",
+                "message": "AIの回答からJSON部分を抽出できませんでした",
                 "raw_response": raw_response
-            })
+            }), 500
 
     except Exception as e:
         return jsonify({
             "status": "error",
-            "message": f"エラーが発生しました: {str(e)}"
-        })
+            "message": str(e)
+        }), 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Vercel Serverless Functions用のハンドラー
+def handler(event, context):
+    with app.test_request_context(
+            path=event.get('path', '/'),
+            method=event.get('httpMethod', 'GET'),
+            query_string=event.get('queryStringParameters', {})
+    ):
+        response = app.full_dispatch_request()
+        return {
+            'statusCode': response.status_code,
+            'body': response.get_data(as_text=True),
+            'headers': dict(response.headers)
+        }
